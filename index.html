@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Era Chillzone | Premium Kasi Food</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* --- FONTS --- */
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Barlow:wght@300;400;600&family=Teko:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Rubik+Dirt&display=swap');
+
+        :root {
+            --brand-orange: #FF5500;
+            --brand-dark: #0a0a0a;
+            --brand-card: #111111;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: white;
+            font-family: 'Barlow', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- SIDEBAR PRISM DESIGN (The Orange Area) --- */
+        .premium-sidebar {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 55%;
+            height: 100vh;
+            /* Deep gradient for premium feel */
+            background: linear-gradient(135deg, #FF5500 0%, #aa3300 100%);
+            z-index: 0;
+            /* Sharp geometric cut */
+            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+            box-shadow: -20px 0 60px rgba(255, 85, 0, 0.3);
+        }
+
+        /* Subtle texture overlay */
+        .premium-sidebar::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(0,0,0,0.15) 1px, transparent 1px);
+            background-size: 24px 24px;
+            opacity: 0.4;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        .font-poster { font-family: 'Anton', sans-serif; letter-spacing: 1px; }
+        .font-grunge { font-family: 'Rubik Dirt', display; }
+        .font-header { font-family: 'Teko', sans-serif; text-transform: uppercase; }
+
+        /* --- HERO IMAGE STYLING (The Wings Picture) --- */
+        .hero-image-wrapper {
+            position: relative;
+            z-index: 10;
+            perspective: 1000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .hero-image {
+            width: auto;
+            max-width: 120%; /* Slight overflow for impact */
+            max-height: 85vh;
+            object-fit: contain;
+            /* THE JUICY FILTERS: High contrast and saturation */
+            filter: contrast(1.1) saturate(1.15) drop-shadow(-30px 30px 50px rgba(0,0,0,0.6));
+            /* Dynamic placement */
+            transform: rotate(-3deg) translateX(20px);
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 12px;
+        }
+
+        .hero-image:hover {
+            transform: rotate(0deg) translateX(0px) scale(1.02);
+            filter: contrast(1.15) saturate(1.25) drop-shadow(-40px 40px 60px rgba(0,0,0,0.7));
+        }
+
+        /* --- MENU & CARDS --- */
+        .menu-card {
+            background-color: var(--brand-card);
+            border: 1px solid #222;
+            transition: all 0.3s ease;
+        }
+        .menu-card:hover { border-color: #333; transform: translateY(-5px); }
+
+        .category-title {
+            font-family: 'Teko', sans-serif;
+            font-size: 2.2rem;
+            color: var(--brand-orange);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+        .menu-item { border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem; margin-bottom: 1.2rem; }
+        .menu-item:last-child { border: none; }
+        .item-name { font-weight: 600; text-transform: uppercase; font-size: 1rem; }
+        .item-price { font-family: 'Teko', sans-serif; font-size: 1.5rem; color: var(--brand-orange); font-weight: 600; }
+
+        .highlight-card {
+            background: linear-gradient(180deg, rgba(255,85,0,0.08) 0%, #111 100%);
+            border: 1px solid var(--brand-orange);
+            box-shadow: 0 0 40px rgba(255,85,0,0.1);
+        }
+
+        #map { height: 400px; width: 100%; border-radius: 12px; filter: grayscale(100%) invert(92%); }
+    </style>
+</head>
+<body class="relative">
+
+    <section class="relative min-h-screen flex items-center overflow-hidden py-20 lg:py-0">
+        
+        <div class="premium-sidebar hidden lg:block"></div>
+
+        <nav class="absolute top-0 left-0 w-full z-50 p-6 md:p-10 flex justify-between items-start max-w-7xl mx-auto left-0 right-0">
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col items-end border-t border-b border-gray-500 py-1 pr-2">
+                    <span class="text-[0.6rem] md:text-xs text-gray-300 tracking-[0.2em] uppercase font-bold">New Era</span>
+                    <span class="text-xl md:text-3xl font-bold font-poster tracking-wide text-white leading-none">CHILLZONE</span>
+                    <span class="text-[0.5rem] md:text-[0.6rem] text-gray-400 tracking-wider uppercase mt-1">Kasi Food Made With Love</span>
+                </div>
+                <i class="fas fa-utensils text-2xl text-white transform -rotate-12"></i>
+            </div>
+            
+            <a href="#menu" class="hidden md:block border border-white/20 bg-white/5 backdrop-blur-md text-white px-8 py-3 font-bold hover:bg-white hover:text-black transition uppercase text-xs tracking-[0.2em]">
+                View Menu
+            </a>
+        </nav>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-6 w-full grid lg:grid-cols-2 items-center gap-12 h-full">
+            
+            <div class="order-2 lg:order-1 pt-20 lg:pt-0">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="h-[1px] w-10 bg-orange-500"></div>
+                    <span class="text-orange-500 font-bold uppercase tracking-[0.3em] text-sm">Flame Grilled Perfection</span>
+                </div>
+                
+                <h1 class="font-grunge text-6xl md:text-8xl lg:text-9xl leading-[0.8] mb-8 text-white">
+                    FOOD<br><span class="text-gray-500">MENU</span>
+                </h1>
+                
+                <p class="text-gray-400 text-lg max-w-md font-light mb-10 leading-relaxed">
+                    We don't just cook; we craft the vibe. Experience the legendary taste of our signature saucy wings, ribs, and premium cuts.
+                </p>
+
+                <div class="flex gap-6">
+                    <a href="#menu" class="bg-orange-600 text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-orange-700 transition shadow-lg shadow-orange-900/50">
+                        Order Now
+                    </a>
+                </div>
+            </div>
+            
+            <div class="order-1 lg:order-2 hero-image-wrapper">
+                <img src="image_6.png" 
+                     class="hero-image"
+                     alt="New Era Chillzone Signature Wings">
+            </div>
+        </div>
+    </section>
+
+    <section id="menu" class="py-24 px-6 bg-[#0a0a0a] relative z-20">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="flex flex-col items-center mb-20">
+                <h2 class="font-header text-6xl text-white">OUR SELECTIONS</h2>
+                <div class="w-24 h-1 bg-orange-500 mt-2"></div>
+                <p class="text-gray-500 tracking-widest uppercase text-sm mt-4">Saucy • Spicy • Legendary</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8 items-stretch">
+                
+                <div class="menu-card p-8 rounded-xl flex flex-col h-full">
+                    <h3 class="category-title">KOTAS</h3>
+                    <div class="menu-item flex justify-between items-start">
+                        <div><div class="item-name">The Special</div><div class="text-xs text-gray-500 italic">Bacon, Special, French, Cheese, Egg</div></div>
+                        <div class="item-price">R35</div>
+                    </div>
+                    <div class="menu-item flex justify-between items-start">
+                        <div><div class="item-name">The Burger Kota</div><div class="text-xs text-gray-500 italic">Burger, Bacon, Special, French</div></div>
+                        <div class="item-price">R45</div>
+                    </div>
+                    <div class="menu-item flex justify-between items-start">
+                        <div><div class="item-name">The Russian</div><div class="text-xs text-gray-500 italic">Russian, French, Special, Cheese</div></div>
+                        <div class="item-price">R57</div>
+                    </div>
+                    <div class="menu-item flex justify-between items-start border-none">
+                        <div><div class="item-name text-orange-500">The Monster</div><div class="text-xs text-gray-500 italic">Vienna, Russian, Burger, Bacon, Egg</div></div>
+                        <div class="item-price">R95</div>
+                    </div>
+                    <div class="mt-auto pt-8 opacity-80 hover:opacity-100 transition duration-500">
+                        <img src="image_13.png" 
+                             class="w-full h-48 object-cover rounded-lg border border-orange-500/20" 
+                             alt="Kota preview">
+                    </div>
+                </div>
+
+                <div class="highlight-card p-8 rounded-xl flex flex-col h-full transform lg:-translate-y-8 z-10">
+                    <div class="text-center border-b border-orange-500/30 pb-6 mb-8">
+                        <h3 class="category-title mb-0">SIGNATURE PLATTERS</h3>
+                        <span class="text-xs text-orange-400 uppercase tracking-widest">Best Value</span>
+                    </div>
+                    <div class="menu-item flex justify-between items-center">
+                        <div><div class="item-name text-lg">Platter For Two</div><div class="text-xs text-gray-400">2 Pap & 2 Sides</div></div>
+                        <div class="item-price">R270</div>
+                    </div>
+                    <div class="menu-item flex justify-between items-center">
+                        <div><div class="item-name text-lg">Platter For Four</div><div class="text-xs text-gray-400">4 Pap & 2 Sides</div></div>
+                        <div class="item-price">R450</div>
+                    </div>
+                    <div class="menu-item flex justify-between items-center border-none">
+                        <div><div class="item-name text-xl text-white">Platter For Six</div><div class="text-xs text-white font-bold">The Ultimate Experience</div></div>
+                        <div class="item-price text-2xl">R680</div>
+                    </div>
+                    <div class="mt-auto pt-8 opacity-80 hover:opacity-100 transition duration-500">
+                        <img src="image_6.png" 
+                             class="w-full h-48 object-cover rounded-lg border border-orange-500/20" 
+                             alt="Platter preview">
+                    </div>
+                </div>
+
+                <div class="menu-card p-8 rounded-xl flex flex-col h-full">
+                    <h3 class="category-title">PLATES & EXTRAS</h3>
+                    <div class="menu-item flex justify-between items-center">
+                        <div class="item-name">Brisket & Wors</div><div class="item-price">R75</div>
+                    </div>
+                    <div class="menu-item flex justify-between items-center">
+                        <div class="item-name">Full Chicken</div><div class="item-price">R120</div>
+                    </div>
+                    <div class="menu-item flex justify-between items-center">
+                        <div class="item-name">Pork Chops & Wings</div><div class="item-price">R95</div>
+                    </div>
+                    <div class="mt-8 pt-4 border-t border-gray-800/50">
+                        <h4 class="text-gray-500 text-sm tracking-widest uppercase mb-4">Sides</h4>
+                        <div class="menu-item flex justify-between items-center">
+                            <div class="item-name text-gray-400">Wings & Chips</div><div class="item-price text-gray-500">R95</div>
+                        </div>
+                        <div class="menu-item flex justify-between items-center border-none">
+                            <div class="item-name text-gray-400">Ribs & Chips</div><div class="item-price text-gray-500">R110</div>
+                        </div>
+                    </div>
+                    <div class="mt-auto pt-8 opacity-80 hover:opacity-100 transition duration-500">
+                        <img src="image_10.png" 
+                             class="w-full h-48 object-cover rounded-lg border border-orange-500/20" 
+                             alt="Wings and Chips preview">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-16 px-6 bg-[#050505] border-t border-gray-900">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+            <div class="relative rounded-2xl overflow-hidden border border-gray-800 shadow-2xl order-2 lg:order-1 h-[400px]">
+                <div id="map" class="z-10 relative h-full w-full"></div>
+            </div>
+            <div class="order-1 lg:order-2">
+                <h2 class="font-header text-5xl mb-8 text-white">FIND THE SPOT</h2>
+                <div class="space-y-8">
+                    <div class="flex gap-6">
+                        <div class="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0 border border-orange-500/20">
+                            <i class="fas fa-map-pin"></i>
+                        </div>
+                        <div>
+                            <strong class="text-white block text-xl font-header tracking-wide mb-1">35 Lepogo Street</strong>
+                            <span class="text-gray-400 font-light">Jabulani Ext 1, Soweto</span>
+                            <div class="text-xs text-gray-600 uppercase tracking-widest mt-2">Behind Bheki Mlangeni Hospital</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-6 mt-12">
+                    <a href="#" class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center hover:bg-orange-500 hover:text-white transition duration-300 text-xl"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center hover:bg-orange-500 hover:text-white transition duration-300 text-xl"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center hover:bg-orange-500 hover:text-white transition duration-300 text-xl"><i class="fab fa-facebook-f"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center py-10 text-gray-700 text-xs uppercase tracking-[0.2em] bg-black">
+        &copy; 2026 New Era Chillzone. Premium Kasi Dining.
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([-26.2505, 27.8550], 15);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap', subdomains: 'abcd', maxZoom: 19
+        }).addTo(map);
+
+        var orangeIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div style='background-color:#FF5500; width: 20px; height: 20px; border-radius: 50%; border: 4px solid white; box-shadow: 0 0 20px #FF5500;'></div>",
+            iconSize: [20, 20], iconAnchor: [10, 10]
+        });
+        L.marker([-26.2505, 27.8550], {icon: orangeIcon}).addTo(map).bindPopup("<b style='color:black'>New Era Chillzone</b>").openPopup();
+    </script>
+</body>
+</html>
